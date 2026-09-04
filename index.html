@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>CDL Jovem App</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  /* Identidade CDL Jovem Teófilo Otoni: azul-petróleo do selo + azul/verde da CDL */
+  --bg:#EDF2F5; --panel:#FFFFFF; --ink:#0A2A3F; --ink-2:#3F5A6E; --ink-3:#7D95A6;
+  --line:#D5DFE6; --field:#F2F6F8;
+  --accent:#0B4A6F; --accent-2:#1373A6; --accent-ink:#FFFFFF; --accent-soft:#DCEBF5;
+  --pop:#00A651; --pop-ink:#FFFFFF;
+  --ok:#0F8A4A; --ok-soft:#DCF3E6; --warn:#B8640C; --warn-soft:#FFF0DA; --bad:#C0392B; --bad-soft:#FDE4E1;
+  --shadow:0 20px 60px rgba(10,42,63,.2);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#071A27; --panel:#0E2635; --ink:#EAF2F7; --ink-2:#A9BFCC; --ink-3:#6B8595;
+    --line:#1E3A4B; --field:#132F3F;
+    --accent:#3FA0D8; --accent-2:#5FB6E8; --accent-ink:#071A27; --accent-soft:#12405A;
+    --pop:#2ECC71; --pop-ink:#062412;
+    --ok:#4FD38F; --ok-soft:#123A26; --warn:#F0A94A; --warn-soft:#3A2A12; --bad:#FF7B6B; --bad-soft:#3E1B18;
+    --shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#071A27; --panel:#0E2635; --ink:#EAF2F7; --ink-2:#A9BFCC; --ink-3:#6B8595;
+  --line:#1E3A4B; --field:#132F3F;
+  --accent:#3FA0D8; --accent-2:#5FB6E8; --accent-ink:#071A27; --accent-soft:#12405A;
+  --pop:#2ECC71; --pop-ink:#062412;
+  --ok:#4FD38F; --ok-soft:#123A26; --warn:#F0A94A; --warn-soft:#3A2A12; --bad:#FF7B6B; --bad-soft:#3E1B18;
+  --shadow:0 20px 60px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5;min-height:100vh}
+h1,h2,h3{font-family:Nunito,Manrope,system-ui,sans-serif;text-wrap:balance;margin:0}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:32px 24px 64px;display:grid;grid-template-columns:1fr 390px 1fr;gap:32px;align-items:start}
+@media (max-width:1000px){.wrap{grid-template-columns:1fr;justify-items:center}.side{max-width:520px;width:100%}}
+
+.side h1{font-size:26px;font-weight:900;letter-spacing:-.01em;line-height:1.15}
+.side .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);margin-bottom:10px}
+.side p{color:var(--ink-2);max-width:42ch;margin:10px 0 0}
+.rules{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.rule{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--ink-2)}
+.rule b{color:var(--ink)}
+.rule .dot{width:22px;height:22px;border-radius:50%;background:var(--pop);color:var(--pop-ink);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:12px;margin-top:1px}
+.legend{margin-top:26px}
+.legend h3{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.tests{display:flex;flex-direction:column;gap:6px}
+.test{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-size:13px;cursor:pointer;text-align:left;color:var(--ink);width:100%}
+.test:hover{border-color:var(--accent-2)}
+.test code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink-2)}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.bad{background:var(--bad-soft);color:var(--bad)}.tag.warn{background:var(--warn-soft);color:var(--warn)}
+
+.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.sw{height:44px;border-radius:8px;display:flex;align-items:flex-end;padding:4px 6px;font-size:10px;font-weight:700;font-family:ui-monospace,Menlo,monospace;color:#fff;border:1px solid var(--line)}
+.logo-big{display:flex;align-items:center;gap:14px;margin-top:12px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.logo-big .muted{font-size:12px}
+
+/* phone */
+.phone{width:390px;height:800px;background:var(--panel);border:1px solid var(--line);border-radius:38px;box-shadow:var(--shadow);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:12px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:26px;border-radius:99px;background:var(--ink);z-index:2}
+.screen{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.screen.active{display:flex}
+.pad{padding:18px 22px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand small{display:block;font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.brand b{font-family:Nunito;font-size:15px;font-weight:800}
+.seal{border-radius:50%;flex:none}
+
+.hero{margin-top:22px}
+.hero h2{font-size:26px;font-weight:900;letter-spacing:-.01em;line-height:1.15}
+.hero p{color:var(--ink-2);margin:8px 0 0;font-size:14px}
+.splash{background:linear-gradient(160deg,#0B4A6F,#0A2A3F);color:#fff;padding:26px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.splash .tagline{font-size:12px;opacity:.85;letter-spacing:.04em}
+.form{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+label{font-size:12px;font-weight:700;color:var(--ink-2);display:block;margin-bottom:5px}
+.input{width:100%;padding:13px 14px;border:1px solid var(--line);background:var(--field);border-radius:12px;color:var(--ink)}
+.input:disabled{opacity:.6}
+.btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:800;font-family:Nunito;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.btn.pop{background:var(--pop);color:var(--pop-ink)}
+.btn.sm{padding:9px 12px;font-size:13px;width:auto;border-radius:9px}
+.btn:disabled{opacity:.5;cursor:default}
+.link{background:none;border:0;color:var(--accent-2);font-weight:700;padding:0}
+.muted{color:var(--ink-3);font-size:13px}
+.msg{padding:11px 13px;border-radius:10px;font-size:13px;line-height:1.4;display:none}
+.msg.show{display:block}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}.msg.ok{background:var(--ok-soft);color:var(--ok)}.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.center{text-align:center}
+.foot{margin-top:auto;padding:14px 22px 22px;text-align:center;font-size:13px;color:var(--ink-2)}
+
+/* home */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 22px 6px}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:13px}
+.role{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--pop);color:var(--pop-ink)}
+.role.admin{background:var(--ink);color:var(--panel)}
+.sect{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px}
+.sect h3{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tile{padding:14px 13px;border-radius:14px;border:1px solid var(--line);background:var(--field);text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:5px;min-height:108px;position:relative}
+.tile.big{grid-column:1/-1;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border:0}
+.tile.big .muted{color:inherit;opacity:.85}
+.tile .ic{font-size:22px;line-height:1}
+.tile b{font-family:Nunito;font-size:14px;line-height:1.2;font-weight:800}
+.tile .muted{font-size:12px}
+.tile .badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--pop);color:var(--pop-ink)}
+.evlist{margin-top:18px}
+.ev{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.ev .date{font-family:Nunito;font-weight:900;font-size:14px;line-height:1.1;text-align:center;color:var(--accent-2);font-variant-numeric:tabular-nums}
+.ev .date small{display:block;font-size:10px;letter-spacing:.08em;color:var(--ink-3);font-weight:800}
+.ev b{font-size:14px;display:block}
+.ev .muted{font-size:12px}
+.ev .n{font-family:Nunito;font-weight:800;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.st{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:99px;white-space:nowrap}
+.st.ativo{background:var(--ok-soft);color:var(--ok)}.st.pend{background:var(--warn-soft);color:var(--warn)}.st.sup{background:var(--accent-soft);color:var(--accent)}
+
+/* fotos */
+.back{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--ink);font-weight:800;font-family:Nunito;padding:14px 22px 0}
+.selfie{margin-top:16px;border:2px dashed var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;cursor:pointer;background:var(--field)}
+.selfie.has{border-style:solid;border-color:var(--accent-2)}
+.face{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 50% 40%,var(--accent-2),var(--accent));display:grid;place-items:center;font-family:Nunito;font-weight:900;font-size:30px;color:#fff;position:relative}
+.face::after{content:"";position:absolute;inset:-6px;border:2px solid var(--pop);border-radius:50%;opacity:0;transition:opacity .3s}
+.selfie.has .face::after{opacity:1}
+.steps{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.step{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:center;font-size:13px;color:var(--ink-3)}
+.step .b{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:10px;font-weight:700}
+.step.run{color:var(--ink)}.step.run .b{border-color:var(--accent-2);border-top-color:transparent;animation:spin .8s linear infinite}
+.step.done{color:var(--ink-2)}.step.done .b{background:var(--ok);border-color:var(--ok);color:#fff}
+.step .v{font-variant-numeric:tabular-nums;font-weight:700;font-size:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.step.run .b{animation:none}}
+.result-h{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px}
+.result-h b{font-family:Nunito;font-size:16px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.ph{aspect-ratio:1;border-radius:8px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.ph .sc{position:absolute;left:5px;top:5px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;background:rgba(0,0,0,.55);color:#fff;font-variant-numeric:tabular-nums}
+.ph .box{position:absolute;width:34%;height:38%;left:33%;top:26%;border:2px solid var(--pop);border-radius:4px}
+.ph .ev-l{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;font-size:9px;font-weight:700;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.65));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.share{margin-top:14px;display:flex;gap:8px}
+.share .btn{padding:12px;font-size:13px}
+
+/* admin / config */
+.table{margin-top:14px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 12px;border-top:1px solid var(--line);font-size:13px;align-items:center}
+.row:first-child{border-top:0}
+.row b{display:block;font-size:13px}
+.row .muted{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.kpi{padding:10px;border-radius:10px;background:var(--field);border:1px solid var(--line)}
+.kpi b{font-family:Nunito;font-size:20px;display:block;font-variant-numeric:tabular-nums;line-height:1.1;font-weight:900}
+.kpi .muted{font-size:11px}
+.kpi.up b{color:var(--ok)}
+.cfg{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:9px 10px;border-top:1px solid var(--line);font-size:13px}
+.cfg:first-child{border-top:0}
+.cfg.off{opacity:.5}
+.cfg input[type=text]{border:0;background:transparent;color:var(--ink);font-weight:700;width:100%;padding:2px 0;border-bottom:1px dashed transparent}
+.cfg input[type=text]:focus{border-bottom-color:var(--accent-2);outline:0}
+.cfg .ctrls{display:flex;gap:4px}
+.ib{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);font-size:12px;display:grid;place-items:center;padding:0}
+.ib.on{background:var(--pop);color:var(--pop-ink);border-color:var(--pop)}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--pop);border-radius:99px}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin:4px 4px 0 0}
+.toast{position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;z-index:3}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.arch h3{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.node{padding:10px 12px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-size:13px}
+.node b{font-family:Nunito;font-size:12px;display:block;font-weight:800}
+.node .muted{font-size:12px}
+.arrow{height:16px;width:2px;background:var(--line);margin-left:20px}
+</style>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <aside class="side">
+    <div class="eyebrow">Protótipo · CDL Jovem Teófilo Otoni</div>
+    <h1>App CDL Jovem</h1>
+    <p>Acesso só para membros já cadastrados pela diretoria. A home é montada a partir de módulos que o admin liga, renomeia e reordena — o mesmo app serve para qualquer CDL Jovem do país.</p>
+
+    <div class="logo-big"><span id="logo-side"></span><div><b style="font-family:Nunito;font-weight:900">Selo CDL Jovem Teófilo Otoni</b><br><span class="muted">Azul-petróleo do selo + azul e verde da CDL. Fonte arredondada (Nunito) para acompanhar o traço da marca.</span></div></div>
+    <div class="swatches">
+      <div class="sw" style="background:#0B4A6F">#0B4A6F</div>
+      <div class="sw" style="background:#1373A6">#1373A6</div>
+      <div class="sw" style="background:#0A2A3F">#0A2A3F</div>
+      <div class="sw" style="background:#00A651">#00A651</div>
+      <div class="sw" style="background:#EDF2F5;color:#0A2A3F">#EDF2F5</div>
+    </div>
+
+    <div class="rules">
+      <div class="rule"><span class="dot">1</span><span><b>Base fechada.</b> Só admin e supervisores inserem membros (nome, e-mail, CDL de origem).</span></div>
+      <div class="rule"><span class="dot">2</span><span><b>Cadastro por convite.</b> O membro só cria a senha se o e-mail já existir na base.</span></div>
+      <div class="rule"><span class="dot">3</span><span><b>Módulos configuráveis.</b> Admin liga/desliga, renomeia e reordena as abas em <i>Configurar módulos</i>.</span></div>
+    </div>
+
+    <div class="legend">
+      <h3>Testar cenários</h3>
+      <div class="tests">
+        <button class="test" onclick="fill('ana.ribeiro@cdljovemteo.com.br')"><span><code>ana.ribeiro@…</code> · membro ativo</span><span class="tag ok">login ok</span></button>
+        <button class="test" onclick="fill('joao.prado@cdljovemteo.com.br')"><span><code>joao.prado@…</code> · na base, sem senha</span><span class="tag warn">criar senha</span></button>
+        <button class="test" onclick="fill('visitante@gmail.com')"><span><code>visitante@…</code> · fora da base</span><span class="tag bad">bloqueado</span></button>
+        <button class="test" onclick="fill('rafael.souza@cdljovemteo.com.br')"><span><code>rafael.souza@…</code> · diretor CDL Jovem</span><span class="tag ok">base + abrir sessão</span></button>
+        <button class="test" onclick="fill('marina.costa@cdljovemteo.com.br')"><span><code>marina.costa@…</code> · presidente CDL Jovem</span><span class="tag ok">+ configurar módulos</span></button>
+        <button class="test" onclick="fill('paulo.mendes@cdlteofilootoni.com.br')"><span><code>paulo.mendes@…</code> · diretoria CDL mater</span><span class="tag ok">base + dashboard</span></button>
+        <button class="test" onclick="fill('silvia.rocha@cdlteofilootoni.com.br')"><span><code>silvia.rocha@…</code> · executivo da CDL</span><span class="tag ok">tudo + níveis</span></button>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:10px">Versão de teste: os dados ficam salvos só neste aparelho. <button class="link" style="font-size:13px" onclick="resetProto()">Zerar dados do teste</button></p>
+    <div class="legend">
+      <h3>Níveis de acesso (padrão)</h3>
+      <div class="rules" style="margin-top:0" id="side-roles"></div>
+    </div>
+  </aside>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span id="clock">09:41</span><span>●●●● ▲ ▮</span></div>
+
+    <!-- LOGIN -->
+    <section class="screen active" id="s-login">
+      <div class="splash"><span id="logo-login"></span><span class="tagline">Formando jovens líderes em Teófilo Otoni</span></div>
+      <div class="pad">
+        <div class="hero" style="margin-top:6px"><h2>Entrar</h2><p>Use o e-mail cadastrado pela diretoria da sua CDL Jovem.</p></div>
+        <form class="form" onsubmit="return doLogin(event)">
+          <div><label for="email">E-mail</label><input class="input" id="email" type="email" placeholder="voce@cdljovemteo.com.br" autocomplete="username" required></div>
+          <div><label for="pwd">Senha</label><input class="input" id="pwd" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+          <div class="msg" id="login-msg"></div>
+          <button class="btn" type="submit">Entrar</button>
+          <button class="btn ghost" type="button" onclick="go('s-signup')">Primeiro acesso · criar senha</button>
+        </form>
+      </div>
+      <div class="foot">Não está na base? Fale com o supervisor da sua CDL Jovem.</div>
+    </section>
+
+    <!-- SIGNUP -->
+    <section class="screen" id="s-signup">
+      <button class="back" onclick="go('s-login')">← Voltar</button>
+      <div class="pad">
+        <div class="hero" style="margin-top:8px"><h2>Primeiro acesso</h2><p>Confirmamos seu e-mail na base de membros antes de liberar a senha.</p></div>
+        <form class="form" onsubmit="return doSignup(event)">
+          <div><label for="su-email">E-mail cadastrado</label><input class="input" id="su-email" type="email" placeholder="voce@cdljovemteo.com.br" required></div>
+          <div class="msg" id="su-msg"></div>
+          <div id="su-found" style="display:none">
+            <div class="msg ok show" id="su-hello"></div>
+            <div style="margin-top:12px"><label for="su-pwd">Criar senha</label><input class="input" id="su-pwd" type="password" placeholder="mínimo 8 caracteres" minlength="8"></div>
+            <div style="margin-top:12px"><label for="su-pwd2">Repetir senha</label><input class="input" id="su-pwd2" type="password" minlength="8"></div>
+          </div>
+          <button class="btn" type="submit" id="su-btn">Verificar e-mail</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section class="screen" id="s-home">
+      <div class="topbar">
+        <div class="brand"><div class="avatar" id="h-av">AR</div><div><small id="h-cdl">CDL Jovem Teófilo Otoni</small><b id="h-name">Ana Ribeiro</b></div></div>
+        <span class="role" id="h-role">membro</span>
+      </div>
+      <div class="pad" style="padding-top:4px">
+        <div id="home-groups"></div>
+        <button class="link" style="margin-top:18px;font-size:13px" onclick="logout()">Sair</button>
+      </div>
+    </section>
+
+    <!-- FOTOS -->
+    <section class="screen" id="s-fotos">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <h2 style="font-size:22px;font-weight:900">Minhas fotos nos eventos</h2>
+        <p class="muted" style="margin:6px 0 0">Tire uma selfie. Comparamos seu rosto com as fotos das pastas de eventos no Google Drive.</p>
+        <div class="selfie" id="selfie" onclick="takeSelfie()" tabindex="0" role="button">
+          <div class="face" id="face">📷</div>
+          <b id="selfie-t">Tirar selfie</b>
+          <span class="muted" id="selfie-s">A imagem é usada só para a comparação e não fica salva.</span>
+        </div>
+        <button class="btn pop" style="margin-top:12px" id="search-btn" onclick="runSearch()" disabled>Buscar minhas fotos</button>
+        <div class="steps" id="steps" style="display:none">
+          <div class="step" id="st1"><span class="b">1</span><span>Enviando rosto para o Rekognition</span><span class="v"></span></div>
+          <div class="step" id="st2"><span class="b">2</span><span>Lendo álbuns do Google Drive</span><span class="v"></span></div>
+          <div class="step" id="st3"><span class="b">3</span><span>Comparando com fotos indexadas</span><span class="v"></span></div>
+          <div class="step" id="st4"><span class="b">4</span><span>Filtrando por confiança ≥ 90%</span><span class="v"></span></div>
+        </div>
+        <div id="results" style="display:none">
+          <div class="result-h"><b id="res-n">14 fotos suas</b><span class="muted" id="res-e">em 4 eventos</span></div>
+          <div class="grid" id="grid"></div>
+          <div class="share">
+            <button class="btn" onclick="toast('Link das 14 fotos copiado')">Compartilhar</button>
+            <button class="btn ghost" onclick="toast('Fotos salvas no aparelho')">Baixar todas</button>
+          </div>
+          <p class="muted center" style="margin-top:12px">Ao compartilhar, a legenda vem com #CDLJovemTeo e o nome do evento.</p>
+        </div>
+        <div class="evlist"><div class="sect"><h3>Álbuns no Drive</h3></div><div id="evs"></div></div>
+      </div>
+    </section>
+
+    <!-- PRESENÇA -->
+    <section class="screen" id="s-presenca">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <h2 style="font-size:22px;font-weight:900" id="pres-title">Presença</h2>
+        <p class="muted" style="margin:6px 0 0">O supervisor projeta um código na tela. Digite ou leia o QR para registrar sua presença.</p>
+        <div class="msg ok show" style="margin-top:14px"><b>Aberta agora</b><br><span id="pres-open">Plenária Mensal · Set/2026 · 19h30 · Sede CDL</span></div>
+        <form class="form" onsubmit="return checkin(event)">
+          <div><label for="cod">Código</label><input class="input" id="cod" placeholder="ex.: 4821" maxlength="4" inputmode="numeric" style="font-family:Nunito;font-size:22px;letter-spacing:.3em;text-align:center"></div>
+          <div class="msg" id="pres-msg"></div>
+          <button class="btn" type="submit">Registrar presença</button>
+          <button class="btn ghost" type="button" onclick="$('cod').value='4821';checkin(new Event('x'))">📷 Ler QR code</button>
+        </form>
+        <div id="pres-admin" style="display:none;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--field)">
+          <b style="font-family:Nunito">Você conduz esta sessão</b>
+          <p class="muted" style="margin:4px 0 10px">Gere o código para projetar. Presenças entram na lista em tempo real.</p>
+          <div style="display:flex;gap:8px;align-items:center"><span style="font-family:Nunito;font-weight:900;font-size:28px;letter-spacing:.2em;color:var(--accent)">4821</span><button class="btn sm pop" onclick="toast('Sessão aberta · 38 presentes')">Abrir sessão</button><button class="btn sm ghost" onclick="toast('Sessão encerrada · lista salva')">Encerrar</button></div>
+        </div>
+        <div class="evlist"><div class="sect"><h3>Meu histórico</h3></div><div id="hist">
+          <div class="ev"><div class="date">14<small>AGO</small></div><div><b>Plenária Mensal</b><span class="muted">presente · 19h34</span></div><span class="st ativo">✓</span></div>
+          <div class="ev"><div class="date">10<small>JUL</small></div><div><b>Plenária Mensal</b><span class="muted">presente · 19h41</span></div><span class="st ativo">✓</span></div>
+          <div class="ev"><div class="date">12<small>JUN</small></div><div><b>Plenária Extraordinária</b><span class="muted">ausente</span></div><span class="st pend">—</span></div>
+        </div></div>
+        <p class="muted" style="margin-top:14px">Frequência do semestre: <b>83%</b> · mínimo do estatuto: 75%</p>
+      </div>
+    </section>
+
+    <!-- LISTA GENÉRICA (agenda, novidades, projetos, etc.) -->
+    <section class="screen" id="s-list">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <div class="eyebrow" id="l-eyebrow" style="font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);margin-bottom:6px"></div>
+        <h2 id="l-title" style="font-size:22px;font-weight:900"></h2>
+        <p class="muted" id="l-desc" style="margin:6px 0 0"></p>
+        <div id="l-body"></div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="screen" id="s-dash">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <h2 style="font-size:22px;font-weight:900">Dashboard de resultados</h2>
+        <p class="muted" style="margin:6px 0 0">CDL Jovem Teófilo Otoni · 2026 até setembro</p>
+        <div class="kpis">
+          <div class="kpi up"><b>48</b><span class="muted">membros ativos</span></div>
+          <div class="kpi"><b>83%</b><span class="muted">presença média</span></div>
+          <div class="kpi up"><b>9</b><span class="muted">novos em 2026</span></div>
+          <div class="kpi"><b>14</b><span class="muted">eventos</span></div>
+          <div class="kpi"><b>6</b><span class="muted">projetos DLI</span></div>
+          <div class="kpi"><b>212h</b><span class="muted">capacitação</span></div>
+        </div>
+        <div class="evlist"><div class="sect"><h3>Metas do ano</h3></div>
+          <div id="goals"></div>
+        </div>
+        <div class="evlist"><div class="sect"><h3>Presença por plenária</h3></div>
+          <svg viewBox="0 0 340 120" width="100%" role="img" aria-label="Presença por plenária, fev a set" style="margin-top:6px">
+            <g fill="var(--accent-2)" font-family="Manrope" font-size="10">
+              <rect x="10" y="52" width="30" height="58" rx="4" opacity=".55"/><text x="25" y="118" text-anchor="middle" fill="var(--ink-3)">fev</text>
+              <rect x="52" y="40" width="30" height="70" rx="4" opacity=".55"/><text x="67" y="118" text-anchor="middle" fill="var(--ink-3)">mar</text>
+              <rect x="94" y="46" width="30" height="64" rx="4" opacity=".55"/><text x="109" y="118" text-anchor="middle" fill="var(--ink-3)">abr</text>
+              <rect x="136" y="30" width="30" height="80" rx="4" opacity=".55"/><text x="151" y="118" text-anchor="middle" fill="var(--ink-3)">mai</text>
+              <rect x="178" y="58" width="30" height="52" rx="4" opacity=".55"/><text x="193" y="118" text-anchor="middle" fill="var(--ink-3)">jun</text>
+              <rect x="220" y="36" width="30" height="74" rx="4" opacity=".55"/><text x="235" y="118" text-anchor="middle" fill="var(--ink-3)">jul</text>
+              <rect x="262" y="26" width="30" height="84" rx="4" opacity=".55"/><text x="277" y="118" text-anchor="middle" fill="var(--ink-3)">ago</text>
+              <rect x="304" y="22" width="30" height="88" rx="4" fill="var(--pop)"/><text x="319" y="118" text-anchor="middle" fill="var(--ink-3)">set</text>
+              <text x="319" y="16" text-anchor="middle" font-weight="700" fill="var(--ink)">92%</text>
+            </g>
+            <line x1="10" y1="110" x2="334" y2="110" stroke="var(--line)"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN: BASE -->
+    <section class="screen" id="s-admin">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <h2 style="font-size:22px;font-weight:900">Base de membros</h2>
+        <p class="muted" style="margin:6px 0 0">Só quem estiver aqui consegue criar senha no app.</p>
+        <div class="kpis">
+          <div class="kpi"><b id="k-total">0</b><span class="muted">na base</span></div>
+          <div class="kpi"><b id="k-ativo">0</b><span class="muted">com senha</span></div>
+          <div class="kpi"><b id="k-pend">0</b><span class="muted">aguardando</span></div>
+        </div>
+        <form class="form" style="margin-top:16px;gap:8px" onsubmit="return addMember(event)">
+          <input class="input" id="nm-name" placeholder="Nome completo" required>
+          <input class="input" id="nm-email" type="email" placeholder="e-mail do membro" required>
+          <input class="input" id="nm-cdl" placeholder="CDL de origem" value="CDL Jovem Teófilo Otoni" required>
+          <select class="input" id="nm-role" aria-label="Nível de acesso"></select>
+          <button class="btn" type="submit">Adicionar à base</button>
+        </form>
+        <div class="table" id="members"></div>
+      </div>
+    </section>
+
+    <!-- ADMIN: CONFIGURAR MÓDULOS -->
+    <section class="screen" id="s-config">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <h2 style="font-size:22px;font-weight:900">Configurar módulos</h2>
+        <p class="muted" style="margin:6px 0 0">Ligue, renomeie (toque no nome) e reordene as abas. Cada CDL Jovem monta a própria home.</p>
+        <div class="table" id="cfg-list"></div>
+        <button class="btn pop" style="margin-top:12px" onclick="go('s-home');toast('Home atualizada')">Salvar e ver a home</button>
+        <button class="btn ghost" style="margin-top:8px" onclick="resetModules()">Restaurar padrão nacional</button>
+      </div>
+    </section>
+
+    <!-- NÍVEIS DE ACESSO -->
+    <section class="screen" id="s-niveis">
+      <button class="back" onclick="go('s-home')">← Início</button>
+      <div class="pad" style="padding-top:6px">
+        <h2 style="font-size:22px;font-weight:900">Níveis de acesso</h2>
+        <p class="muted" style="margin:6px 0 0">Cinco níveis. Toque nas células para personalizar o que cada nível pode fazer.</p>
+        <div style="overflow-x:auto;margin-top:12px"><table id="perm-table" style="border-collapse:collapse;font-size:12px;min-width:100%"></table></div>
+        <button class="btn pop" style="margin-top:12px" onclick="renderHome();toast('Permissões salvas')">Salvar</button>
+        <button class="btn ghost" style="margin-top:8px" onclick="ROLES=JSON.parse(JSON.stringify(DEFAULT_ROLES));renderPerms();toast('Padrão restaurado')">Restaurar padrão</button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <aside class="side">
+    <div class="arch">
+      <h3>Módulos do app</h3>
+      <div class="rules" style="margin-top:0" id="side-mods"></div>
+    </div>
+    <div class="legend">
+      <h3>Como funciona por trás</h3>
+      <div class="node"><b>App (membro)</b><span class="muted">Login por e-mail + senha · home montada pela configuração da CDL</span></div><div class="arrow"></div>
+      <div class="node"><b>Autenticação + base de membros</b><span class="muted">e-mail existe? senha criada? perfil (admin / supervisor / membro)</span></div><div class="arrow"></div>
+      <div class="node"><b>Configuração por CDL</b><span class="muted">lista de módulos ativos, nomes e ordem — salva por CDL, com padrão nacional</span></div><div class="arrow"></div>
+      <div class="node"><b>Fotos por rosto</b><span class="muted">indexador lê o Drive → AWS Rekognition → SearchFacesByImage ≥ 90%</span></div><div class="arrow"></div>
+      <div class="node"><b>Dashboard</b><span class="muted">agrega presença, membros, eventos, projetos DLI e horas de capacitação</span></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---- Logo (selo CDL Jovem Teófilo Otoni, recriado em SVG) ----
+function logoSVG(size){
+  return `<svg class="seal" width="${size}" height="${size}" viewBox="0 0 100 100" role="img" aria-label="CDL Jovem Teófilo Otoni">
+  <defs><linearGradient id="g${size}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1373A6"/><stop offset="1" stop-color="#0A2A3F"/></linearGradient></defs>
+  <circle cx="50" cy="50" r="49" fill="url(#g${size})"/><circle cx="50" cy="50" r="46.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1"/>
+  <path d="M17 36 L38 36 L33 54 L12 54 Z" fill="#fff"/><path d="M19 42 L30 42 L28 48 L17 48 Z" fill="#1373A6"/>
+  <text x="41" y="53" font-family="Nunito,Manrope,sans-serif" font-weight="900" font-style="italic" font-size="21" fill="#fff">CDL</text>
+  <text x="41" y="66" font-family="Nunito,Manrope,sans-serif" font-weight="800" font-size="11" fill="#fff">Jovem</text>
+  <text x="50" y="77" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="700" font-size="6.2" fill="#fff" letter-spacing=".3">Teófilo Otoni</text>
+</svg>`;
+}
+document.getElementById('logo-side').innerHTML=logoSVG(64);
+document.getElementById('logo-login').innerHTML=logoSVG(96);
+
+// ---- Dados simulados (exemplo) ----
+// ---- Níveis de acesso ----
+// Permissões personalizáveis por nível (matriz editável em "Níveis de acesso")
+const PERMS=[
+  {id:'base',    label:'Cadastrar membros na base'},
+  {id:'sessao',  label:'Abrir sessão de presença (plenária/reunião)'},
+  {id:'projetos',label:'Editar projetos e status'},
+  {id:'dash',    label:'Ver dashboard de resultados'},
+  {id:'config',  label:'Configurar módulos da home'},
+  {id:'niveis',  label:'Editar níveis de acesso'},
+];
+const DEFAULT_ROLES={
+  membro:    {lvl:1,label:'Membro',                short:'membro',     p:{}},
+  diretor:   {lvl:2,label:'Diretor CDL Jovem',     short:'diretor',    p:{base:1,sessao:1,projetos:1,dash:1}},
+  presidente:{lvl:3,label:'Presidente CDL Jovem',  short:'presidente', p:{base:1,sessao:1,projetos:1,dash:1,config:1}},
+  mater:     {lvl:4,label:'Diretoria CDL (mater)', short:'dir. CDL',   p:{base:1,dash:1}},
+  executivo: {lvl:5,label:'Executivo da CDL',      short:'executivo',  p:{base:1,sessao:1,projetos:1,dash:1,config:1,niveis:1}},
+};
+let ROLES=JSON.parse(JSON.stringify(DEFAULT_ROLES));
+const can=(perm)=>!!(user&&ROLES[user.role].p[perm]);
+const members=[
+  {name:'Ana Ribeiro',   email:'ana.ribeiro@cdljovemteo.com.br',   cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:'cdljovem'},
+  {name:'Rafael Souza',  email:'rafael.souza@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'diretor',    pwd:'cdljovem'},
+  {name:'Marina Costa',  email:'marina.costa@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'presidente', pwd:'cdljovem'},
+  {name:'Paulo Mendes',  email:'paulo.mendes@cdlteofilootoni.com.br', cdl:'CDL Teófilo Otoni',   role:'mater',      pwd:'cdljovem'},
+  {name:'Sílvia Rocha',  email:'silvia.rocha@cdlteofilootoni.com.br', cdl:'CDL Teófilo Otoni',   role:'executivo',  pwd:'cdljovem'},
+  {name:'João Prado',    email:'joao.prado@cdljovemteo.com.br',    cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:null},
+  {name:'Camila Nunes',  email:'camila.nunes@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:null},
+];
+const events=[
+  {d:'22',m:'AGO',name:'Encontro Regional CDL Jovem',n:412,c:['#1373A6','#0A2A3F']},
+  {d:'09',m:'AGO',name:'Workshop Gestão Financeira', n:138,c:['#00A651','#1373A6']},
+  {d:'25',m:'JUL',name:'Happy Hour de Network',       n:296,c:['#F59E0B','#DC2626']},
+  {d:'12',m:'JUL',name:'Ação Social — Doação de Sangue',n:207,c:['#DC2626','#7C3AED']},
+  {d:'28',m:'JUN',name:'Plenária Toastmaster',        n:187,c:['#0891B2','#00A651']},
+];
+
+// ---- Módulos (padrão nacional; cada CDL personaliza) ----
+const DEFAULT_MODULES=[
+  {id:'fotos',     ic:'📸', name:'Minhas fotos',           sub:'Reconhecimento facial nos álbuns', grp:'Destaque', on:true, big:true, open:()=>go('s-fotos')},
+  {id:'plenaria',  ic:'🏛️', name:'Plenária',               sub:'Presença por código/QR',           grp:'Eventos e compromissos', on:true, open:()=>openPresenca('Plenária','Plenária Mensal · Set/2026 · 19h30 · Sede CDL')},
+  {id:'toast',     ic:'🎤', name:'Toastmaster',            sub:'Oratória e liderança',             grp:'Eventos e compromissos', on:true, open:()=>openList('toast')},
+  {id:'happy',     ic:'🍻', name:'Happy hour',             sub:'Próximo: 18/09',                   grp:'Eventos e compromissos', on:true, open:()=>openList('happy')},
+  {id:'agenda',    ic:'📅', name:'Agenda de eventos',      sub:'Tudo do mês',                      grp:'Eventos e compromissos', on:true, open:()=>openList('agenda')},
+  {id:'reuniao',   ic:'🗓️', name:'Reuniões semanais',      sub:'Terças · 19h',                     grp:'Eventos e compromissos', on:true, open:()=>openPresenca('Reunião semanal','Reunião de diretoria · terça 08/09 · 19h · online')},
+  {id:'prospec',   ic:'🧲', name:'Prospecção de membros',  sub:'Indique um jovem lojista',         grp:'Membros', on:true, open:()=>openList('prospec')},
+  {id:'pesquisa',  ic:'📊', name:'Pesquisa com membros',   sub:'1 pesquisa aberta',                grp:'Membros', on:true, badge:'nova', open:()=>openList('pesquisa')},
+  {id:'sugest',    ic:'💡', name:'Quadro de sugestões',    sub:'Vote e proponha',                  grp:'Membros', on:true, open:()=>openList('sugest')},
+  {id:'projetos',  ic:'🚀', name:'Projetos CDL Jovem · DLI',sub:'6 projetos em andamento',         grp:'Projetos e resultados', on:true, open:()=>openList('projetos')},
+  {id:'dash',      ic:'📈', name:'Dashboard de resultados',sub:'Metas e indicadores',              grp:'Projetos e resultados', on:true, perm:'dash', open:()=>go('s-dash')},
+  {id:'novidades', ic:'📣', name:'Novidades',              sub:'Comunicados da diretoria',         grp:'Projetos e resultados', on:true, open:()=>openList('novidades')},
+  {id:'capacita',  ic:'🎓', name:'Capacitação',            sub:'Trilhas e certificados',           grp:'Pilares', on:true, open:()=>openList('capacita')},
+  {id:'social',    ic:'💚', name:'Responsabilidade social',sub:'Ações e voluntariado',             grp:'Pilares', on:true, open:()=>openList('social')},
+  {id:'captacao',  ic:'💰', name:'Captação de recursos',   sub:'Editais e parcerias',              grp:'Pilares', on:false, open:()=>openList('captacao')},
+];
+let modules=DEFAULT_MODULES.map(m=>({...m}));
+function resetModules(){ modules=DEFAULT_MODULES.map(m=>({...m})); renderConfig(); toast('Padrão nacional restaurado'); }
+
+let user=null;
+const $=id=>document.getElementById(id);
+function go(id){ if(id==='s-admin')renderMembers(); if(id==='s-config')renderConfig(); if(id==='s-niveis')renderPerms(); if(id==='s-signup')resetSignup(); if(id==='s-home')renderHome(); if(id==='s-presenca')hide('pres-msg'); document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); $(id).scrollTop=0; }
+function msg(id,kind,text){const m=$(id);m.className='msg show '+kind;m.textContent=text;}
+function hide(id){$(id).className='msg';}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+function find(email){return members.find(m=>m.email.toLowerCase()===email.trim().toLowerCase());}
+function initials(n){return n.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();}
+function fill(email){go('s-login');$('email').value=email;$('pwd').value='cdljovem';hide('login-msg');$('email').focus();}
+
+// ---- Login / cadastro ----
+function doLogin(e){
+  e.preventDefault();
+  const email=$('email').value,pwd=$('pwd').value,m=find(email);
+  if(!m){msg('login-msg','bad','Este e-mail não está na base de membros. O cadastro é feito apenas pelo admin ou supervisor da sua CDL Jovem.');return false;}
+  if(!m.pwd){msg('login-msg','warn','Você está na base, mas ainda não criou sua senha. Toque em "Primeiro acesso".');return false;}
+  if(m.pwd!==pwd){msg('login-msg','bad','Senha incorreta. No protótipo, a senha é "cdljovem".');return false;}
+  login(m);return false;
+}
+function login(m){
+  user=m;hide('login-msg');
+  $('h-av').textContent=initials(m.name);$('h-name').textContent=m.name;$('h-cdl').textContent=m.cdl;
+  const r=$('h-role');r.textContent=ROLES[m.role].short;r.className='role'+(m.role!=='membro'?' admin':'');
+  renderEvents();resetFotos();go('s-home');
+}
+function logout(){user=null;$('email').value='';$('pwd').value='';go('s-login');}
+let suFound=null;
+function doSignup(e){
+  e.preventDefault();
+  if(!suFound){
+    const m=find($('su-email').value);
+    if(!m){msg('su-msg','bad','E-mail não encontrado na base. Peça ao supervisor da sua CDL Jovem para cadastrar você.');return false;}
+    if(m.pwd){msg('su-msg','warn','Este e-mail já tem senha. Volte e faça login.');return false;}
+    suFound=m;hide('su-msg');
+    $('su-hello').textContent=`Encontramos você: ${m.name} · ${m.cdl}. Agora crie sua senha.`;
+    $('su-found').style.display='block';$('su-email').disabled=true;$('su-btn').textContent='Criar senha e entrar';$('su-pwd').focus();
+    return false;
+  }
+  const p1=$('su-pwd').value,p2=$('su-pwd2').value;
+  if(p1.length<8){msg('su-msg','bad','A senha precisa ter pelo menos 8 caracteres.');return false;}
+  if(p1!==p2){msg('su-msg','bad','As senhas não conferem.');return false;}
+  suFound.pwd=p1;const m=suFound;resetSignup();login(m);toast('Senha criada. Bem-vindo(a)!');return false;
+}
+function resetSignup(){suFound=null;$('su-email').disabled=false;$('su-email').value='';$('su-pwd').value='';$('su-pwd2').value='';$('su-found').style.display='none';$('su-btn').textContent='Verificar e-mail';hide('su-msg');}
+
+// ---- Home configurável ----
+function renderHome(){
+  const groups=[];
+  modules.filter(m=>m.on&&(!m.perm||can(m.perm))).forEach(m=>{let g=groups.find(x=>x.name===m.grp);if(!g){g={name:m.grp,items:[]};groups.push(g);}g.items.push(m);});
+  let html=groups.map(g=>`<div class="sect"><h3>${g.name}</h3></div><div class="tiles">${g.items.map(m=>`<button class="tile${m.big?' big':''}" onclick="modules.find(x=>x.id==='${m.id}').open()">${m.badge?`<span class="badge">${m.badge}</span>`:''}<span class="ic">${m.ic}</span><b>${m.name}</b><span class="muted">${m.sub}</span></button>`).join('')}</div>`).join('');
+  const adm=[];
+  if(can('base'))adm.push(`<button class="tile" onclick="go('s-admin')"><span class="ic">🗂️</span><b>Base de membros</b><span class="muted">Cadastrar e revisar</span></button>`);
+  if(can('config'))adm.push(`<button class="tile" onclick="go('s-config')"><span class="ic">⚙️</span><b>Configurar módulos</b><span class="muted">Ligar, renomear, ordenar</span></button>`);
+  if(can('niveis'))adm.push(`<button class="tile" onclick="go('s-niveis')"><span class="ic">🔐</span><b>Níveis de acesso</b><span class="muted">Quem pode o quê</span></button>`);
+  if(adm.length)html+=`<div class="sect"><h3>Administração · ${ROLES[user.role].label}</h3></div><div class="tiles">${adm.join('')}</div>`;
+  $('home-groups').innerHTML=html;
+}
+function renderConfig(){
+  $('cfg-list').innerHTML=modules.map((m,i)=>`<div class="cfg${m.on?'':' off'}"><span style="font-size:18px">${m.ic}</span><div><input type="text" value="${m.name.replace(/"/g,'&quot;')}" onchange="modules[${i}].name=this.value" aria-label="Nome do módulo"><span class="muted" style="display:block">${m.grp}</span></div><div class="ctrls"><button class="ib" title="Subir" onclick="moveMod(${i},-1)">↑</button><button class="ib" title="Descer" onclick="moveMod(${i},1)">↓</button><button class="ib${m.on?' on':''}" title="${m.on?'Desligar':'Ligar'}" onclick="modules[${i}].on=!modules[${i}].on;renderConfig()">${m.on?'✓':'○'}</button></div></div>`).join('');
+}
+function renderPerms(){
+  const keys=Object.keys(ROLES);
+  let h=`<tr><th style="text-align:left;padding:6px 4px;color:var(--ink-3);font-weight:700">Permissão</th>${keys.map(k=>`<th style="padding:6px 2px;color:var(--ink-2);font-weight:800;font-size:10px;writing-mode:vertical-rl;transform:rotate(180deg);height:88px">${ROLES[k].label}</th>`).join('')}</tr>`;
+  h+=PERMS.map(p=>`<tr style="border-top:1px solid var(--line)"><td style="padding:8px 4px;color:var(--ink)">${p.label}</td>${keys.map(k=>`<td style="text-align:center;padding:4px 2px"><button class="ib${ROLES[k].p[p.id]?' on':''}" onclick="ROLES['${k}'].p['${p.id}']=ROLES['${k}'].p['${p.id}']?0:1;renderPerms()" aria-label="${ROLES[k].label}: ${p.label}">${ROLES[k].p[p.id]?'✓':'○'}</button></td>`).join('')}</tr>`).join('');
+  $('perm-table').innerHTML=h;
+}
+function moveMod(i,d){const j=i+d;if(j<0||j>=modules.length)return;[modules[i],modules[j]]=[modules[j],modules[i]];renderConfig();}
+document.getElementById('side-roles').innerHTML=Object.values(DEFAULT_ROLES).map(r=>`<div class="rule" style="padding:8px 12px"><span class="dot">${r.lvl}</span><span><b>${r.label}</b> · ${Object.keys(r.p).length?PERMS.filter(p=>r.p[p.id]).map(p=>p.label.toLowerCase().split(' (')[0]).join(', '):'usa os módulos da home'}</span></div>`).join('');
+document.getElementById('side-mods').innerHTML=DEFAULT_MODULES.map(m=>`<div class="rule" style="padding:8px 12px"><span style="font-size:16px">${m.ic}</span><span><b>${m.name}</b> · ${m.sub}${m.on?'':' <span class="tag warn">desligado no padrão</span>'}</span></div>`).join('');
+
+function renderEvents(){$('evs').innerHTML=events.map(ev=>`<div class="ev"><div class="date">${ev.d}<small>${ev.m}</small></div><div><b>${ev.name}</b><span class="muted">Drive · Eventos/2026</span></div><span class="n">${ev.n} fotos</span></div>`).join('');}
+
+// ---- Fotos ----
+let selfieOk=false;
+function resetFotos(){selfieOk=false;$('selfie').classList.remove('has');$('face').textContent='📷';$('selfie-t').textContent='Tirar selfie';$('selfie-s').textContent='A imagem é usada só para a comparação e não fica salva.';$('search-btn').disabled=true;$('search-btn').textContent='Buscar minhas fotos';$('steps').style.display='none';$('results').style.display='none';['st1','st2','st3','st4'].forEach(s=>{$(s).className='step';$(s).querySelector('.v').textContent='';});}
+function takeSelfie(){if(selfieOk)return;selfieOk=true;$('selfie').classList.add('has');$('face').textContent=initials(user.name);$('selfie-t').textContent='Rosto detectado';$('selfie-s').textContent='1 rosto · qualidade boa · toque em buscar';$('search-btn').disabled=false;}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function runSearch(){
+  $('search-btn').disabled=true;$('steps').style.display='flex';$('results').style.display='none';
+  const total=events.reduce((a,e)=>a+e.n,0);
+  const plan=[['st1',600,'ok'],['st2',700,`${events.length} álbuns`],['st3',1100,`${total.toLocaleString('pt-BR')} fotos`],['st4',500,'14 acima']];
+  for(const [id,ms,v] of plan){$(id).classList.add('run');await wait(ms);$(id).classList.remove('run');$(id).classList.add('done');$(id).querySelector('.v').textContent=v;}
+  const picks=[0,0,0,0,0,2,2,2,2,1,1,3,3,4],scores=[99.4,98.9,98.1,97.6,96.2,99.1,97.8,95.0,93.4,98.3,94.7,96.9,91.2,90.6];
+  $('grid').innerHTML=picks.map((pi,i)=>{const ev=events[pi];return `<div class="ph" style="--c1:${ev.c[0]};--c2:${ev.c[1]}"><span class="sc">${scores[i].toFixed(1)}%</span><span class="box"></span><span class="ev-l">${ev.name}</span></div>`;}).join('');
+  $('res-e').textContent=`em ${new Set(picks).size} eventos`;
+  $('results').style.display='block';$('search-btn').disabled=false;$('search-btn').textContent='Buscar de novo';
+}
+
+// ---- Presença (plenária / reunião) ----
+function openPresenca(title,open){$('pres-title').textContent=title;$('pres-open').textContent=open;$('pres-admin').style.display=can('sessao')?'block':'none';go('s-presenca');}
+function checkin(e){
+  e.preventDefault();const c=$('cod').value.trim();
+  if(c!=='4821'){msg('pres-msg','bad','Código inválido ou sessão encerrada. No protótipo, use 4821.');return false;}
+  msg('pres-msg','ok',`Presença registrada · ${user.name} · ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`);
+  $('hist').insertAdjacentHTML('afterbegin',`<div class="ev"><div class="date">04<small>SET</small></div><div><b>${$('pres-title').textContent}</b><span class="muted">presente · agora</span></div><span class="st ativo">✓</span></div>`);
+  $('cod').value='';toast('Presença confirmada');return false;
+}
+
+// ---- Telas de lista (conteúdo de exemplo por módulo) ----
+const evRow=(d,m,t,s,r='')=>`<div class="ev"><div class="date">${d}<small>${m}</small></div><div><b>${t}</b><span class="muted">${s}</span></div><span class="n">${r}</span></div>`;
+const rsvp=(t)=>`<button class="btn sm" onclick="toast('${t}')">Confirmar</button>`;
+const LISTS={
+  agenda:{e:'Eventos e compromissos',t:'Agenda de eventos',d:'Tudo que a CDL Jovem tem no mês. Confirme presença e receba lembrete.',b:()=>[evRow('08','SET','Reunião de diretoria','terça · 19h · online',rsvp('Presença confirmada')),evRow('11','SET','Plenária Mensal','19h30 · Sede CDL',rsvp('Presença confirmada')),evRow('15','SET','Toastmaster · sessão 12','19h · Auditório CDL',rsvp('Vaga garantida')),evRow('18','SET','Happy Hour de Network','19h · Rooftop Centro',rsvp('Presença confirmada')),evRow('25','SET','Ação social · Asilo São Vicente','sábado · 9h',rsvp('Inscrito como voluntário'))].join('')},
+  happy:{e:'Eventos e compromissos',t:'Happy hour',d:'Network leve entre os membros e convidados.',b:()=>`<div class="msg ok show" style="margin-top:14px"><b>Próximo: sexta 18/09 · 19h</b><br>Rooftop Centro · 80 vagas · 52 confirmados</div><button class="btn pop" style="margin-top:12px" onclick="toast('Presença confirmada')">Confirmar presença</button><div class="sect"><h3>Quem vai</h3></div><div>${['Ana Ribeiro','Rafael Souza','Camila Nunes','Marina Costa','+48'].map(n=>`<span class="chip">${n}</span>`).join('')}</div><div class="sect"><h3>Anteriores</h3></div>${evRow('25','JUL','Happy Hour de Network','68 presentes','296 fotos')}${evRow('30','MAI','Happy Hour Junino','74 presentes','180 fotos')}`},
+  toast:{e:'Eventos e compromissos',t:'Toastmaster',d:'Sessões de oratória e liderança no formato Toastmasters.',b:()=>`<div class="sect"><h3>Próxima sessão · 15/09</h3></div>${evRow('1','','Discurso preparado','Ana Ribeiro · "Meu primeiro negócio"','7 min')}${evRow('2','','Discurso preparado','Vaga aberta',rsvp('Você se inscreveu'))}${evRow('3','','Avaliador geral','Rafael Souza','')}${evRow('4','','Table topics','sorteio na hora','')}<div class="sect"><h3>Meu progresso</h3></div><p class="muted">Discursos concluídos: <b>3 de 10</b></p><div class="bar"><i style="width:30%"></i></div>`},
+  prospec:{e:'Membros',t:'Prospecção de novos membros',d:'Indique jovens lojistas. O supervisor entra em contato e, se aprovado, cadastra na base.',b:()=>`<form class="form" onsubmit="event.preventDefault();toast('Indicação enviada ao supervisor');this.reset()"><input class="input" placeholder="Nome do indicado" required><input class="input" placeholder="WhatsApp" required><input class="input" placeholder="Empresa / segmento"><button class="btn">Indicar</button></form><div class="sect"><h3>Funil 2026</h3></div><div class="kpis"><div class="kpi"><b>31</b><span class="muted">indicados</span></div><div class="kpi"><b>17</b><span class="muted">contatados</span></div><div class="kpi up"><b>9</b><span class="muted">viraram membros</span></div></div>`},
+  pesquisa:{e:'Membros',t:'Pesquisa com membros',d:'Respostas anônimas. Resultado vai para o dashboard.',b:()=>`<div class="msg warn show" style="margin-top:14px"><b>Aberta: Avaliação do 1º semestre</b><br>5 perguntas · 2 min · encerra 12/09</div><form class="form" onsubmit="event.preventDefault();toast('Resposta enviada. Obrigado!')"><label>Como você avalia as plenárias?</label><div style="display:flex;gap:6px">${[1,2,3,4,5].map(n=>`<button type="button" class="ib" style="width:40px;height:40px;font-weight:800" onclick="[...this.parentNode.children].forEach(b=>b.classList.remove('on'));this.classList.add('on')">${n}</button>`).join('')}</div><label>O que a CDL Jovem deveria fazer mais?</label><textarea class="input" rows="3" placeholder="Sua sugestão"></textarea><button class="btn">Enviar</button></form>`},
+  sugest:{e:'Membros',t:'Quadro de sugestões',d:'Proponha e vote. As mais votadas entram na pauta da diretoria.',b:()=>`${[['Mentoria com lojistas experientes',23],['Visita técnica a um centro de distribuição',17],['Curso de tráfego pago para lojas',14],['Plenária itinerante nos bairros',9]].map(([t,v])=>`<div class="ev" style="grid-template-columns:1fr auto"><div><b>${t}</b><span class="muted">${v} votos</span></div><button class="btn sm ghost" onclick="toast('Voto registrado')">▲ Votar</button></div>`).join('')}<form class="form" onsubmit="event.preventDefault();toast('Sugestão publicada');this.reset()"><input class="input" placeholder="Nova sugestão" required><button class="btn">Publicar</button></form>`},
+  projetos:{e:'Projetos e resultados',t:'Projetos CDL Jovem · DLI',d:'Projetos da CDL Jovem e os apoiados pelo DLI, com status e responsável.',b:()=>[['Dia Livre de Impostos 2026','DLI · Rafael Souza',80,'em execução'],['Escola do Futuro','Capacitação · Marina Costa',45,'em execução'],['Compra Premiada · edição jovem','Parceria CDL · Ana Ribeiro',20,'planejamento'],['Podcast CDL Jovem','Comunicação · Camila Nunes',60,'em execução'],['Doação de sangue','Resp. social · João Prado',100,'concluído'],['Contadores 2026','Network · Rafael Souza',10,'planejamento']].map(([t,s,p,st])=>`<div class="ev" style="grid-template-columns:1fr auto"><div><b>${t}</b><span class="muted">${s}</span><div class="bar"><i style="width:${p}%"></i></div></div><span class="st ${p===100?'ativo':(p<30?'pend':'sup')}">${st}</span></div>`).join('')},
+  novidades:{e:'Projetos e resultados',t:'Novidades',d:'Comunicados da diretoria.',b:()=>[['Happy Hour de Network · 18/09','Eventos','Sexta, 19h, Rooftop Centro. Vagas: 80.'],['Trilha "Gestão para Lojistas" aberta','Capacitação','6 aulas online + 1 encontro presencial.'],['Edital DLI 2026: parcerias','Captação','Prazo: 30/09.'],['Doação de sangue bateu meta','Resp. social','207 bolsas. Fotos já estão no Drive.']].map(([t,k,b])=>`<div class="ev" style="grid-template-columns:1fr"><div><span class="st sup">${k}</span><b style="margin-top:6px">${t}</b><span class="muted">${b}</span></div></div>`).join('')},
+  capacita:{e:'Pilar · Capacitação e desenvolvimento',t:'Capacitação',d:'Trilhas de formação com certificado nacional.',b:()=>[['Gestão para Lojistas','6 aulas · 12h',40],['Vendas e atendimento','4 aulas · 8h',100],['Oratória (Toastmaster)','contínuo',30]].map(([t,s,p])=>`<div class="ev" style="grid-template-columns:1fr auto"><div><b>${t}</b><span class="muted">${s}</span><div class="bar"><i style="width:${p}%"></i></div></div><span class="n">${p}%</span></div>`).join('')},
+  social:{e:'Pilar · Responsabilidade social',t:'Responsabilidade social',d:'Ações sociais com metas e prestação de contas.',b:()=>`${evRow('25','SET','Asilo São Vicente','voluntários: 12 de 20',rsvp('Inscrito'))}${evRow('12','JUL','Doação de sangue','207 bolsas · meta 200','✓')}<div class="sect"><h3>Impacto 2026</h3></div><div class="kpis"><div class="kpi up"><b>4</b><span class="muted">ações</span></div><div class="kpi"><b>86</b><span class="muted">voluntários</span></div><div class="kpi"><b>1.2k</b><span class="muted">pessoas alcançadas</span></div></div>`},
+  captacao:{e:'Pilar · Captação de recursos · DLI',t:'Captação de recursos',d:'Editais, patrocínios e parcerias que financiam os projetos.',b:()=>`${evRow('30','SET','Edital DLI 2026','projetos com contrapartida',rsvp('Rascunho iniciado'))}${evRow('15','OUT','Patrocínio Happy Hour','cotas ouro/prata/bronze','')}`},
+};
+function openList(k){const L=LISTS[k];$('l-eyebrow').textContent=L.e;$('l-title').textContent=L.t;$('l-desc').textContent=L.d;$('l-body').innerHTML=L.b();go('s-list');}
+
+// ---- Dashboard metas ----
+$('goals').innerHTML=[['Novos membros',9,15],['Presença média',83,80],['Eventos realizados',14,20],['Horas de capacitação',212,300]].map(([t,v,g])=>`<div class="ev" style="grid-template-columns:1fr auto"><div><b>${t}</b><span class="muted">${v} de ${g}</span><div class="bar"><i style="width:${Math.min(100,v/g*100)}%"></i></div></div><span class="n">${Math.round(v/g*100)}%</span></div>`).join('');
+
+// ---- Admin base ----
+function renderMembers(){
+  const ativo=members.filter(m=>m.pwd).length;
+  $('k-total').textContent=members.length;$('k-ativo').textContent=ativo;$('k-pend').textContent=members.length-ativo;
+  // só pode atribuir níveis até o seu próprio
+  const mine=ROLES[user.role].lvl;
+  $('nm-role').innerHTML=Object.entries(ROLES).filter(([k,r])=>r.lvl<=mine).map(([k,r])=>`<option value="${k}">${r.label}</option>`).join('');
+  $('members').innerHTML=members.map(m=>`<div class="row"><div><b>${m.name}</b><span class="muted">${m.email} · ${m.cdl}</span></div><div style="display:flex;gap:4px;align-items:center"><span class="st ${m.role!=='membro'?'sup':(m.pwd?'ativo':'pend')}">${m.role!=='membro'?ROLES[m.role].short:(m.pwd?'ativo':'aguardando')}</span></div></div>`).join('');
+}
+function addMember(e){
+  e.preventDefault();const email=$('nm-email').value.trim();
+  if(find(email)){toast('Este e-mail já está na base');return false;}
+  members.unshift({name:$('nm-name').value.trim(),email,cdl:$('nm-cdl').value.trim(),role:$('nm-role').value,pwd:null});
+  $('nm-name').value='';$('nm-email').value='';renderMembers();toast('Membro adicionado. Agora ele pode criar a senha.');return false;
+}
+// ---- Persistência local (neste aparelho) para o teste online ----
+const KEY='cdljovem-proto-v1';
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify({members,modules:modules.map(m=>({id:m.id,name:m.name,on:m.on})),ROLES}));}catch(e){}}
+(function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;
+  if(s.members){members.length=0;s.members.forEach(m=>members.push(m));}
+  if(s.modules){const byId=Object.fromEntries(DEFAULT_MODULES.map(m=>[m.id,m]));modules=s.modules.filter(x=>byId[x.id]).map(x=>({...byId[x.id],name:x.name,on:x.on}));DEFAULT_MODULES.forEach(m=>{if(!modules.find(x=>x.id===m.id))modules.push({...m});});}
+  if(s.ROLES)ROLES=s.ROLES;}catch(e){}})();
+['addMember','doSignup','moveMod','resetModules','renderPerms','renderConfig','checkin'].forEach(fn=>{const o=window[fn];window[fn]=function(){const r=o.apply(this,arguments);saveState();return r;};});
+document.addEventListener('change',saveState);
+window.resetProto=function(){try{localStorage.removeItem(KEY);}catch(e){}location.reload();};
+(function tick(){const d=new Date();$('clock').textContent=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');setTimeout(tick,30000);})();
+</script>
+
+</body>
+</html>
