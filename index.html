@@ -394,6 +394,8 @@ label{font-size:12px;font-weight:700;color:var(--ink-2);display:block;margin-bot
           <input class="input" id="nm-name" placeholder="Nome completo" required>
           <input class="input" id="nm-email" type="email" placeholder="e-mail do membro" required>
           <input class="input" id="nm-cdl" placeholder="CDL de origem" value="CDL Jovem Teófilo Otoni" required>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input class="input" id="nm-emp" placeholder="Empresa"><input class="input" id="nm-seg" placeholder="Segmento"></div>
+          <input class="input" id="nm-cargo" placeholder="Cargo (na empresa ou na diretoria)">
           <select class="input" id="nm-role" aria-label="Nível de acesso"></select>
           <button class="btn" type="submit">Adicionar à base</button>
         </form>
@@ -480,13 +482,15 @@ const DEFAULT_ROLES={
 let ROLES=JSON.parse(JSON.stringify(DEFAULT_ROLES));
 const can=(perm)=>!!(user&&ROLES[user.role].p[perm]);
 const members=[
-  {name:'Ana Ribeiro',   email:'ana.ribeiro@cdljovemteo.com.br',   cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:'cdljovem'},
-  {name:'Rafael Souza',  email:'rafael.souza@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'diretor',    pwd:'cdljovem'},
-  {name:'Marina Costa',  email:'marina.costa@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'presidente', pwd:'cdljovem'},
-  {name:'Paulo Mendes',  email:'paulo.mendes@cdlteofilootoni.com.br', cdl:'CDL Teófilo Otoni',   role:'mater',      pwd:'cdljovem'},
-  {name:'Sílvia Rocha',  email:'silvia.rocha@cdlteofilootoni.com.br', cdl:'CDL Teófilo Otoni',   role:'executivo',  pwd:'cdljovem'},
-  {name:'João Prado',    email:'joao.prado@cdljovemteo.com.br',    cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:null},
-  {name:'Camila Nunes',  email:'camila.nunes@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:null},
+  {name:'Ana Ribeiro',   email:'ana.ribeiro@cdljovemteo.com.br',   cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:'cdljovem', emp:'Ana Modas',            seg:'Moda e vestuário',     cargo:'Sócia-proprietária'},
+  {name:'Rafael Souza',  email:'rafael.souza@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'diretor',    pwd:'cdljovem', emp:'Souza Calçados',       seg:'Calçados',             cargo:'Diretor de Eventos'},
+  {name:'Marina Costa',  email:'marina.costa@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'presidente', pwd:'cdljovem', emp:'Ótica Costa',          seg:'Óticas',               cargo:'Presidente'},
+  {name:'Paulo Mendes',  email:'paulo.mendes@cdlteofilootoni.com.br', cdl:'CDL Teófilo Otoni',   role:'mater',      pwd:'cdljovem', emp:'Mendes Materiais',     seg:'Construção',           cargo:'Vice-presidente CDL'},
+  {name:'Sílvia Rocha',  email:'silvia.rocha@cdlteofilootoni.com.br', cdl:'CDL Teófilo Otoni',   role:'executivo',  pwd:'cdljovem', emp:'CDL Teófilo Otoni',    seg:'Entidade',             cargo:'Executiva'},
+  {name:'João Prado',    email:'joao.prado@cdljovemteo.com.br',    cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:null,       emp:'Sheikcell',            seg:'Celulares e assistência', cargo:'Gerente'},
+  {name:'Camila Nunes',  email:'camila.nunes@cdljovemteo.com.br',  cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:null,       emp:'Doce Vida Confeitaria',seg:'Alimentação',          cargo:'Proprietária'},
+  {name:'Lucas Ferreira',email:'lucas.ferreira@cdljovemteo.com.br',cdl:'CDL Jovem Teófilo Otoni', role:'diretor',    pwd:'cdljovem', emp:'Ferreira Contabilidade',seg:'Serviços',            cargo:'Diretor de Capacitação'},
+  {name:'Bruna Lima',    email:'bruna.lima@cdljovemteo.com.br',    cdl:'CDL Jovem Teófilo Otoni', role:'membro',     pwd:'cdljovem', emp:'Sheikcell',            seg:'Celulares e assistência', cargo:'Sócia'},
 ];
 const events=[
   {d:'22',m:'AGO',name:'Encontro Regional CDL Jovem',n:412,c:['#1373A6','#0A2A3F']},
@@ -504,6 +508,8 @@ const DEFAULT_MODULES=[
   {id:'happy',     ic:'🍻', name:'Happy hour',             sub:'Próximo: 18/09',                   grp:'Eventos e compromissos', on:true, open:()=>openList('happy')},
   {id:'agenda',    ic:'📅', name:'Agenda de eventos',      sub:'Tudo do mês',                      grp:'Eventos e compromissos', on:true, open:()=>openList('agenda')},
   {id:'reuniao',   ic:'🗓️', name:'Reuniões semanais',      sub:'Terças · 19h',                     grp:'Eventos e compromissos', on:true, open:()=>openPresenca('Reunião semanal','Reunião de diretoria · terça 08/09 · 19h · online')},
+  {id:'mural',     ic:'👥', name:'Mural de membros',       sub:'Diretoria e membros',              grp:'Membros', on:true, open:()=>openList('mural')},
+  {id:'empresas',  ic:'🏪', name:'Catálogo de empresas',   sub:'Quem faz o quê na cidade',         grp:'Membros', on:true, open:()=>openList('empresas')},
   {id:'prospec',   ic:'🧲', name:'Prospecção de membros',  sub:'Indique um jovem lojista',         grp:'Membros', on:true, open:()=>openList('prospec')},
   {id:'pesquisa',  ic:'📊', name:'Pesquisa com membros',   sub:'1 pesquisa aberta',                grp:'Membros', on:true, badge:'nova', open:()=>openList('pesquisa')},
   {id:'sugest',    ic:'💡', name:'Quadro de sugestões',    sub:'Vote e proponha',                  grp:'Membros', on:true, open:()=>openList('sugest')},
@@ -618,7 +624,24 @@ function checkin(e){
 // ---- Telas de lista (conteúdo de exemplo por módulo) ----
 const evRow=(d,m,t,s,r='')=>`<div class="ev"><div class="date">${d}<small>${m}</small></div><div><b>${t}</b><span class="muted">${s}</span></div><span class="n">${r}</span></div>`;
 const rsvp=(t)=>`<button class="btn sm" onclick="toast('${t}')">Confirmar</button>`;
+const card=(m,extra='')=>`<div class="ev" style="grid-template-columns:40px 1fr auto"><div class="avatar" style="width:40px;height:40px">${initials(m.name)}</div><div><b>${m.name}</b><span class="muted">${m.cargo||''}${m.emp?' · '+m.emp:''}</span></div>${extra}</div>`;
+const wa=(m)=>`<button class="ib" title="WhatsApp" onclick="toast('Abrindo WhatsApp de ${m.name.split(' ')[0]}')">💬</button>`;
+function muralHTML(q=''){
+  const f=m=>!q||(m.name+' '+(m.emp||'')+' '+(m.cargo||'')).toLowerCase().includes(q.toLowerCase());
+  const grp=(t,list)=>list.length?`<div class="sect"><h3>${t}</h3><span class="muted">${list.length}</span></div>${list.map(m=>card(m,wa(m))).join('')}`:'';
+  return grp('Diretoria CDL Jovem',members.filter(m=>['presidente','diretor'].includes(m.role)&&f(m)).sort((a,b)=>ROLES[b.role].lvl-ROLES[a.role].lvl))
+       + grp('CDL mater · diretoria e executivo',members.filter(m=>['mater','executivo'].includes(m.role)&&f(m)))
+       + grp('Membros',members.filter(m=>m.role==='membro'&&f(m)).sort((a,b)=>a.name.localeCompare(b.name)));
+}
+function empresasHTML(q=''){
+  const emps={};members.forEach(m=>{if(!m.emp||m.seg==='Entidade')return;(emps[m.emp]=emps[m.emp]||{seg:m.seg,people:[]}).people.push(m);});
+  const list=Object.entries(emps).filter(([n,e])=>!q||(n+' '+e.seg+' '+e.people.map(p=>p.name).join(' ')).toLowerCase().includes(q.toLowerCase())).sort((a,b)=>a[1].seg.localeCompare(b[1].seg)||a[0].localeCompare(b[0]));
+  const segs=[...new Set(list.map(([n,e])=>e.seg))];
+  return segs.map(s=>`<div class="sect"><h3>${s}</h3></div>`+list.filter(([n,e])=>e.seg===s).map(([n,e])=>`<div class="ev" style="grid-template-columns:1fr auto"><div><b>🏪 ${n}</b><span class="muted">${e.people.map(p=>p.name+(p.cargo?' ('+p.cargo+')':'')).join(' · ')}</span></div><button class="btn sm ghost" onclick="toast('Contato de ${n} copiado')">Contato</button></div>`).join('')).join('')||'<p class="muted">Nenhuma empresa encontrada.</p>';
+}
 const LISTS={
+  mural:{e:'Membros',t:'Mural de membros',d:'Quem é quem na CDL Jovem e na CDL mater.',b:()=>`<input class="input" style="margin-top:12px" placeholder="Buscar por nome, empresa ou cargo" oninput="$('mural-body').innerHTML=muralHTML(this.value)"><div class="kpis"><div class="kpi"><b>${members.filter(m=>['presidente','diretor'].includes(m.role)).length}</b><span class="muted">diretoria jovem</span></div><div class="kpi"><b>${members.filter(m=>m.role==='membro').length}</b><span class="muted">membros</span></div><div class="kpi"><b>${members.filter(m=>['mater','executivo'].includes(m.role)).length}</b><span class="muted">CDL mater</span></div></div><div id="mural-body">${muralHTML()}</div>`},
+  empresas:{e:'Membros',t:'Catálogo de empresas',d:'As empresas dos membros, por segmento, e quem está em cada uma. Compre de quem está com você.',b:()=>`<input class="input" style="margin-top:12px" placeholder="Buscar empresa, segmento ou pessoa" oninput="$('emp-body').innerHTML=empresasHTML(this.value)"><div id="emp-body">${empresasHTML()}</div>`},
   agenda:{e:'Eventos e compromissos',t:'Agenda de eventos',d:'Tudo que a CDL Jovem tem no mês. Confirme presença e receba lembrete.',b:()=>[evRow('08','SET','Reunião de diretoria','terça · 19h · online',rsvp('Presença confirmada')),evRow('11','SET','Plenária Mensal','19h30 · Sede CDL',rsvp('Presença confirmada')),evRow('15','SET','Toastmaster · sessão 12','19h · Auditório CDL',rsvp('Vaga garantida')),evRow('18','SET','Happy Hour de Network','19h · Rooftop Centro',rsvp('Presença confirmada')),evRow('25','SET','Ação social · Asilo São Vicente','sábado · 9h',rsvp('Inscrito como voluntário'))].join('')},
   happy:{e:'Eventos e compromissos',t:'Happy hour',d:'Network leve entre os membros e convidados.',b:()=>`<div class="msg ok show" style="margin-top:14px"><b>Próximo: sexta 18/09 · 19h</b><br>Rooftop Centro · 80 vagas · 52 confirmados</div><button class="btn pop" style="margin-top:12px" onclick="toast('Presença confirmada')">Confirmar presença</button><div class="sect"><h3>Quem vai</h3></div><div>${['Ana Ribeiro','Rafael Souza','Camila Nunes','Marina Costa','+48'].map(n=>`<span class="chip">${n}</span>`).join('')}</div><div class="sect"><h3>Anteriores</h3></div>${evRow('25','JUL','Happy Hour de Network','68 presentes','296 fotos')}${evRow('30','MAI','Happy Hour Junino','74 presentes','180 fotos')}`},
   toast:{e:'Eventos e compromissos',t:'Toastmaster',d:'Sessões de oratória e liderança no formato Toastmasters.',b:()=>`<div class="sect"><h3>Próxima sessão · 15/09</h3></div>${evRow('1','','Discurso preparado','Ana Ribeiro · "Meu primeiro negócio"','7 min')}${evRow('2','','Discurso preparado','Vaga aberta',rsvp('Você se inscreveu'))}${evRow('3','','Avaliador geral','Rafael Souza','')}${evRow('4','','Table topics','sorteio na hora','')}<div class="sect"><h3>Meu progresso</h3></div><p class="muted">Discursos concluídos: <b>3 de 10</b></p><div class="bar"><i style="width:30%"></i></div>`},
@@ -648,11 +671,11 @@ function renderMembers(){
 function addMember(e){
   e.preventDefault();const email=$('nm-email').value.trim();
   if(find(email)){toast('Este e-mail já está na base');return false;}
-  members.unshift({name:$('nm-name').value.trim(),email,cdl:$('nm-cdl').value.trim(),role:$('nm-role').value,pwd:null});
-  $('nm-name').value='';$('nm-email').value='';renderMembers();toast('Membro adicionado. Agora ele pode criar a senha.');return false;
+  members.unshift({name:$('nm-name').value.trim(),email,cdl:$('nm-cdl').value.trim(),role:$('nm-role').value,pwd:null,emp:$('nm-emp').value.trim(),seg:$('nm-seg').value.trim(),cargo:$('nm-cargo').value.trim()});
+  ['nm-name','nm-email','nm-emp','nm-seg','nm-cargo'].forEach(i=>$(i).value='');renderMembers();toast('Membro adicionado. Agora ele pode criar a senha.');return false;
 }
 // ---- Persistência local (neste aparelho) para o teste online ----
-const KEY='cdljovem-proto-v1';
+const KEY='cdljovem-proto-v2';
 function saveState(){try{localStorage.setItem(KEY,JSON.stringify({members,modules:modules.map(m=>({id:m.id,name:m.name,on:m.on})),ROLES}));}catch(e){}}
 (function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;
   if(s.members){members.length=0;s.members.forEach(m=>members.push(m));}
